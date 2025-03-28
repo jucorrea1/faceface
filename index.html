@@ -74,6 +74,11 @@
       border-radius: 8px;
       object-fit: cover;
     }
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease-out;
+    }
+
   </style>
 </head>
 <body>
@@ -161,36 +166,46 @@
     };
 
     submitBtn.onclick = () => {
-      const image = canvas.toDataURL('image/jpeg', 0.5); // Comprimir
-      const selectedToken = document.querySelector('input[name="fotoSelecionada"]:checked')?.value;
-const timestamp = new Date().getTime();
-formData.append("ts", timestamp); // ← aqui adicionamos o timestamp extra
+  const image = canvas.toDataURL('image/jpeg', 0.5); // Comprimir
+  const selectedToken = document.querySelector('input[name="fotoSelecionada"]:checked')?.value;
+  const timestamp = new Date().getTime();
 
-      if (!selectedToken) {
-        alert("Selecione uma imagem da galeria antes de submeter.");
-        return;
-      }
+  if (!selectedToken) {
+    alert("Selecione uma imagem da galeria antes de submeter.");
+    return;
+  }
 
-      const formData = new FormData();
-      formData.append("image_base64", image);
-      formData.append("face_token", selectedToken);
+  // Aplica fade-out visual nos botões
+  retryBtn.classList.add('fade-out');
+  submitBtn.classList.add('fade-out');
 
-      fetch('https://hook.us2.make.com/qodu75oxf2p360zf6nxkqmpsrw8wa6mq', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-.then(data => {
-  localStorage.setItem("userPhoto", image); // salva selfie
-  localStorage.setItem("confidence", data.confidence); // salva o número da confiança
-  localStorage.setItem("resultImage", data.image); // salva a imagem vinda do Make
-  window.location.href = `resultado.html`;
-})
-      .catch(err => {
-        alert('Erro ao enviar imagem.');
-        console.error(err);
-      });
-    };
+  // Após a transição (300ms), realmente esconde os botões
+  setTimeout(() => {
+    retryBtn.classList.add('hidden');
+    submitBtn.classList.add('hidden');
+  }, 300);
+
+  const formData = new FormData();
+  formData.append("image_base64", image);
+  formData.append("face_token", selectedToken);
+
+  fetch(`https://hook.us2.make.com/qodu75oxf2p360zf6nxkqmpsrw8wa6mq?ts=${timestamp}`, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    localStorage.setItem("userPhoto", image); // salva selfie
+    localStorage.setItem("confidence", data.confidence); // salva o número da confiança
+    localStorage.setItem("resultImage", data.image); // salva a imagem vinda do Make
+    window.location.href = `resultado.html`;
+  })
+  .catch(err => {
+    alert('Erro ao enviar imagem.');
+    console.error(err);
+  });
+};
+
   </script>
 </body>
 </html>
