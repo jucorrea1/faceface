@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultado da Análise</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Arial Black', sans-serif;
+      background: linear-gradient(135deg, #d02aff, #1e1aff);
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+      animation: slideDown 0.8s ease forwards;
+    }
+
+    .faces {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .face-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .face-block p {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .face-block img {
+      width: 200px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .face-block img:hover {
+      transform: scale(1.05);
+    }
+
+    .score {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #00ffea;
+      margin-bottom: 0.8rem;
+      animation: pulse 1.5s infinite;
+    }
+
+    .phrase {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .back-button {
+      margin-top: 2.5rem;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: white;
+      color: #1e1aff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #ddd;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Resultado da Análise</h1>
+
+  <div class="faces">
+    <div class="face-block">
+      <p>Imagem escolhida</p>
+      <img id="galleryImage" src="" alt="Imagem da galeria" />
+    </div>
+    <div class="face-block">
+      <p>Sua selfie</p>
+      <img id="selfieImage" src="" alt="Sua selfie" />
+    </div>
+  </div>
+
+  <p id="similarityScore" class="score">Similaridade: --%</p>
+  <p id="resultPhrase" class="phrase">Aguardando análise...</p>
+
+  <button class="back-button" onclick="voltar()">Voltar</button>
+
+  <script>
+    const galleryImage = localStorage.getItem("selectedImage");
+    const selfieImage = localStorage.getItem("resultImage");
+    const confidence = parseFloat(localStorage.getItem("confidence"));
+
+    function definirFrase(similaridade) {
+      const arredondado = Math.round(similaridade);
+      if (arredondado >= 85) return "É praticamente você!";
+      if (arredondado >= 60) return "Parecidos... talvez seja você.";
+      if (arredondado >= 40) return "Tem uma leve semelhança.";
+      return "Acho que não é você não!";
+    }
+
+    function exibirResultado() {
+      if (!galleryImage || !selfieImage || isNaN(confidence)) {
+        document.querySelector(".phrase").innerText = "Dados incompletos. Tente novamente.";
+        return;
+      }
+
+      document.getElementById("galleryImage").src = galleryImage;
+      document.getElementById("selfieImage").src = selfieImage;
+      document.getElementById("similarityScore").innerText = `Similaridade: ${Math.round(confidence)}%`;
+      document.getElementById("resultPhrase").innerText = definirFrase(confidence);
+    }
+
+    function voltar() {
+      localStorage.clear();
+      window.location.href = "camera.html";
+    }
+
+    exibirResultado();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reconhecimento Facial</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial Black', sans-serif;
+      background: linear-gradient(135deg, #d02aff, #1e1aff);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+    #camera, #preview {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 16px;
+      transform: scaleX(-1);
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: white;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #ccc;
+    }
+    .gallery {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .gallery label {
+      display: inline-block;
+      cursor: pointer;
+      border: 3px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border 0.3s;
+    }
+    .gallery input[type="radio"] {
+      display: none;
+    }
+    .gallery input[type="radio"]:checked + img {
+      border: 3px solid #fff;
+    }
+    .gallery img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vamos analisar se é você que estamos procurando</h1>
+
+  <div id="step1">
+    <p>Escolha qual dessas fotos representa você:</p>
+    <div class="gallery">
+      <label><input type="radio" name="fotoSelecionada" value="73a2658e9c28fcbba92ffc034e777a2b"><img src="https://i.imgur.com/kAhwx38.jpeg" /></label>
+      <label><input type="radio" name="fotoSelecionada" value="bf6de130686de413e03fa7f8a3f775ac"><img src="https://i.imgur.com/6Lm3nwU.jpeg" /></label>
+      <label><input type="radio" name="fotoSelecionada" value="022297b6b2f5f2629f81fa4794038065"><img src="https://i.imgur.com/PnhVLMY.jpeg" /></label>
+      <label><input type="radio" name="fotoSelecionada" value="7899817502e4c88aa5abf5ce0a071201"><img src="https://i.imgur.com/g1nsvdu.jpeg" /></label>
+      <label><input type="radio" name="fotoSelecionada" value="7129624aef1e86b1494d88aaf853bec9"><img src="https://i.imgur.com/zYAMAcM.jpeg" /></label>
+    </div>
+    <button id="nextStep">Avançar</button>
+  </div>
+
+  <div id="step2" class="hidden">
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="preview" class="hidden"></canvas>
+    <div>
+      <button id="capture">Tirar Foto</button>
+      <button id="retry" class="hidden">Tirar Novamente</button>
+      <button id="submit" class="hidden">Submeter</button>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('preview');
+    const captureBtn = document.getElementById('capture');
+    const retryBtn = document.getElementById('retry');
+    const submitBtn = document.getElementById('submit');
+    const nextStepBtn = document.getElementById('nextStep');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+
+    nextStepBtn.onclick = () => {
+      const selected = document.querySelector('input[name="fotoSelecionada"]:checked');
+      if (!selected) {
+        alert("Por favor, selecione uma foto da galeria.");
+        return;
+      }
+
+      // Salva a imagem selecionada no localStorage
+      const selectedImgElement = selected.nextElementSibling;
+      const imgURL = selectedImgElement.src;
+      localStorage.setItem("selectedImage", imgURL);
+
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+    };
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+        })
+        .catch(err => console.error('Erro ao acessar a câmera: ', err));
+    } else {
+      alert("Seu navegador não suporta acesso à câmera.");
+    }
+
+    captureBtn.onclick = () => {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      video.classList.add('hidden');
+      canvas.classList.remove('hidden');
+      captureBtn.classList.add('hidden');
+      retryBtn.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+    };
+
+    retryBtn.onclick = () => {
+      canvas.classList.add('hidden');
+      video.classList.remove('hidden');
+      captureBtn.classList.remove('hidden');
+      retryBtn.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+    };
+
+    submitBtn.onclick = () => {
+      const image = canvas.toDataURL('image/jpeg', 0.5); // Comprimir
+      const selectedToken = document.querySelector('input[name="fotoSelecionada"]:checked')?.value;
+const timestamp = new Date().getTime();
+formData.append("ts", timestamp); // ← aqui adicionamos o timestamp extra
+
+      if (!selectedToken) {
+        alert("Selecione uma imagem da galeria antes de submeter.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image_base64", image);
+      formData.append("face_token", selectedToken);
+
+      fetch('https://hook.us2.make.com/qodu75oxf2p360zf6nxkqmpsrw8wa6mq', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+.then(data => {
+  localStorage.setItem("userPhoto", image); // salva selfie
+  localStorage.setItem("confidence", data.confidence); // salva o número da confiança
+  localStorage.setItem("resultImage", data.image); // salva a imagem vinda do Make
+  window.location.href = `resultado.html`;
+})
+      .catch(err => {
+        alert('Erro ao enviar imagem.');
+        console.error(err);
+      });
+    };
+  </script>
+</body>
+</html>
